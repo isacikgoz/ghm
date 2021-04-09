@@ -7,7 +7,7 @@ GHM(GitHub Maintainer) is a tool for getting quick info for the github repositor
 ## Install
 
 ```bash
-go get github.com/isacikgoz/ghm/cmd/ghm
+go get -u github.com/isacikgoz/ghm/cmd/ghm
 ```
 
 ## License
