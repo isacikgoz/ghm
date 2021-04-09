@@ -29,7 +29,7 @@ func (f *Fetcher) GetOpenPullRequests(ctx context.Context, owner, project string
 	prs := make([]*github.PullRequest, 0)
 	prListOpts := &github.PullRequestListOptions{
 		State:       "open",
-		ListOptions: github.ListOptions{PerPage: 50},
+		ListOptions: github.ListOptions{PerPage: 100},
 	}
 
 	for {
@@ -37,13 +37,14 @@ func (f *Fetcher) GetOpenPullRequests(ctx context.Context, owner, project string
 		if err != nil {
 			return nil, err
 		}
+
+		prs = append(prs, ps...)
 		if resp.NextPage == 0 {
 			break
 		}
+
 		prListOpts.Page = resp.NextPage
 		time.Sleep(50 * time.Millisecond)
-
-		prs = append(prs, ps...)
 	}
 
 	return prs, nil

@@ -8,25 +8,29 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/isacikgoz/ghm/internal/fetcher"
-	"github.com/isacikgoz/ghm/internal/printer"
+	"github.com/isacikgoz/ghm/internal/render"
 	"github.com/rodaine/table"
 )
 
 func main() {
-	if len(os.Args) < 4 {
-		fmt.Fprintf(os.Stderr, "Expected at least 3 arguments, but got %d\n", len(os.Args)-1)
+	if len(os.Args) < 5 {
+		fmt.Fprintf(os.Stderr, "Expected at least 4 arguments, but got %d\n", len(os.Args)-1)
 		printUsage()
 		os.Exit(1)
 	}
 
-	accessToken := os.Args[3]
-	owner := os.Args[1]
-	project := os.Args[2]
+	if os.Args[1] != "pr" {
+		os.Exit(0)
+	}
+
+	accessToken := os.Args[4]
+	owner := os.Args[2]
+	project := os.Args[3]
 
 	f := fetcher.New(accessToken)
 	ctx := context.Background()
 
-	cancel := printer.StartSimpleProgress(ctx, os.Stdout, "fetching "+strings.Join(os.Args[1:3], "/")+"...")
+	cancel := render.StartSimpleProgress(ctx, os.Stdout, "fetching pull requests of "+strings.Join(os.Args[2:4], "/")+"...")
 	defer cancel()
 
 	prs, err := f.GetOpenPullRequests(ctx, owner, project)
@@ -40,8 +44,9 @@ func main() {
 		reviewers, err := f.GetPullRequestReviewers(ctx, owner, project, pr.GetUser().GetLogin(), pr.GetNumber())
 		checkError(err)
 
-		tbl.AddRow(pr.GetUser().GetLogin(), &printer.LastUpdate{Date: pr.GetUpdatedAt()}, pr.GetHTMLURL(), &printer.Reviewers{Reviewers: reviewers})
+		tbl.AddRow(pr.GetUser().GetLogin(), &render.LastUpdate{Date: pr.GetUpdatedAt()}, pr.GetHTMLURL(), &render.Reviewers{Reviewers: reviewers})
 	}
+	cancel()
 
 	fmt.Println()
 	tbl.Print()
@@ -55,5 +60,5 @@ func checkError(err error) {
 }
 
 func printUsage() {
-	fmt.Println("Usage: ghm <repository owner> <repository name> <github access token>")
+	fmt.Println("Usage: ghm pr <repository owner> <repository name> <github access token>")
 }

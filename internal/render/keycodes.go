@@ -1,4 +1,4 @@
-package printer
+package render
 
 // These are the key that aliases
 const (
